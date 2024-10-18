@@ -1,0 +1,67 @@
+#
+# Makefile for a plain file
+#
+
+ifndef DEST_DIR
+  DEST_DIR := $(HOME)
+endif
+
+MODE := 444
+
+FILE_PATH := $(shell pwd | sed -e 's|^.*/home/||')
+FILE := $(notdir $(FILE_PATH))
+
+ifeq ($(FILE_PATH),$(FILE))
+  FILE_PATH := $(DEST_DIR)
+endif
+
+BUILT_FILE := $(FILE).generated
+DEST_FILE := $(FILE_PATH)/$(FILE)
+
+# If the last two parts of the destination path are the same, chop the
+# last one.  E.g., .ssh/config/config should go to .ssh/config
+DEST_FILE_LAST := $(notdir $(DEST_FILE))
+DEST_FILE_PENULTIMATE := $(lastword $(subst /, ,$(dir $(DEST_FILE))))
+ifeq ($(DEST_FILE_LAST),$(DEST_FILE_PENULTIMATE))
+  DEST_FILE := $(DEST_DIR)/$(FILE_PATH)
+endif
+
+# No matter how it fell out, turn dot- into actual dots
+DEST_FILE := $(subst dot-,.,$(DEST_FILE))
+
+M4_FILES := $(sort $(wildcard *.m4))
+
+default: build
+
+
+$(BUILT_FILE): $(M4_MACROS) $(M4_FILES)
+ifndef M4_MACROS
+	@echo M4_MACROS is not defined.
+	@false
+endif
+	rm -f "$@"
+	m4 $^ > "$@"
+	chmod $(MODE) "$@"
+TO_CLEAN += $(BUILT_FILE)
+
+build: $(BUILT_FILE)
+
+
+# This uses rsync so the installed file doesn't change if the contents
+# don't.
+INSTALLED := $(DEST_FILE)
+$(INSTALLED): $(BUILT_FILE)
+	mkdir -p $(DEST_DIR)
+	rsync --quiet --checksum --ignore-times "$<" "$@"
+
+install: $(INSTALLED)
+
+
+uninstall::
+	rm -f $(INSTALLED)
+
+
+clean:
+	rm -rf $(TO_CLEAN) *~
+
+-include Makefile-local

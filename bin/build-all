@@ -1,0 +1,20 @@
+#!/bin/sh -e
+
+TOP=$(cd "$1" && pwd)
+shift
+
+
+find "${TOP}" -name Makefile \
+    | sed -e 's|//|/|g' \
+    | egrep -ve "${TOP}/Makefile\$" \
+    | sed -e 's|/[^/]*$||g' \
+    | (
+    set -e
+    while read DIR
+    do
+	printf "\n\n#\n"
+	echo "# ${DIR}: make $@"
+	printf "#\n\n"
+	make -C "${DIR}" "$@"
+    done
+    )

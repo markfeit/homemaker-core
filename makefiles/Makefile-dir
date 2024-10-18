@@ -1,0 +1,34 @@
+#
+# Makefile for a directory
+#
+
+ifndef DEST_DIR
+  DEST_DIR := $(HOME)
+endif
+
+MODE := 755
+
+DIR_PATH := $(DEST_DIR)/$(subst dot-,.,$(shell pwd | sed -e 's|^.*/home/||'))
+
+
+default: build
+
+
+build:
+	@echo Nothing to do here.
+
+$(DIR_PATH)::
+	mkdir -p "$@"
+	chmod $(MODE) "$@"
+
+install: $(DIR_PATH)
+
+
+uninstall::
+	@echo Not removing directory $(DIR_PATH)
+
+
+clean:
+	rm -rf $(TO_CLEAN) *~
+
+-include Makefile-local

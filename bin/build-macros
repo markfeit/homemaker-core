@@ -1,0 +1,36 @@
+#!/bin/sh -e
+#
+# Build the Homemaker M4 macros
+#
+
+RCFILE="${HOME}/.homemaker"
+if [ -e "${RCFILE}" ]
+then
+    . "${RCFILE}"
+fi
+
+
+# This Host
+
+HM_HOST="${HM_HOST:-$(hostname)}"
+HM_HOST_SHORT=$(echo "${HM_HOST}" | sed -e 's/\..*$//')
+cat <<EOF
+changequote(<<<,>>>)dnl
+define(<<<_HM_HOST>>>,<<<${HM_HOST}>>>)dnl
+define(<<<_HM_HOST_SHORT>>>,<<<${HM_HOST_SHORT}>>>)dnl
+define(<<<_HM_OS>>>,<<<$(uname -s)>>>)dnl
+EOF
+
+# Things that are enabled (or not).  "always" is always enabled.
+
+for ENABLE in always $(uname -s) ${HM_ENABLE}
+do
+    echo "define(<<<__HM_ENABLED_${ENABLE}>>>,1)dnl"
+done
+
+cat <<EOF
+define(<<<__hm_enabled_name>>>,<<<format(<<<<<<__HM_ENABLED_%s>>>>>>,<<<\$1>>>)>>>)dnl
+define(<<<_hm_enabled>>>,<<<ifdef(__hm_enabled_name(\$1),1,0)>>>)dnl
+define(<<<_hm_ifenabled>>>,<<<ifelse(_hm_enabled(\$1),1,<<<<<<\$2>>>>>>,)>>>)dnl
+define(<<<_hm_ifdisabled>>>,<<<ifelse(_hm_enabled(\$1),1,,<<<<<<\$2>>>>>>)>>>)dnl
+EOF

@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# Update from Git if appropriate and in a cron-suitable way
+#
+
+TOP=$(dirname $0)/..
+
+[ -e "${TOP}/.git" ] || exit 0
+
+
+OUTPUT=$(mktemp)
+cleanup()
+{
+    rm -rf "${OUTPUT}"
+}
+trap cleanup EXIT
+
+
+if ! git -C "${TOP}" pull > "${OUTPUT}" 2>&1
+then
+   cat "${OUTPUT}" 1>&2
+   exit 1
+fi
+
+
+if ! make -C "${TOP}" install > "${OUTPUT}" 2>&1
+then
+   cat "${OUTPUT}" 1>&2
+   exit 1
+fi
