@@ -51,7 +51,7 @@ build: $(BUILT_FILE)
 # don't.
 INSTALLED := $(DEST_FILE)
 $(INSTALLED): $(BUILT_FILE)
-	mkdir -p $(DEST_DIR)
+	mkdir -p "$(dir $@)"
 	rsync --quiet --checksum --ignore-times "$<" "$@"
 
 install: $(INSTALLED)
