@@ -2,13 +2,18 @@
 # Makefile for a plain file
 #
 
+-include Makefile-local
+
 ifndef DEST_DIR
   DEST_DIR := $(HOME)
 endif
 
-MODE := 444
+ifndef MODE
+  MODE := 444
+endif
 
-FILE_PATH := $(shell pwd | sed -e 's|^.*/home/||')
+# TODO: Pass the path in instead of hard-wiring it.
+FILE_PATH := $(shell pwd | sed -e 's|^.*/work/||')
 FILE := $(notdir $(FILE_PATH))
 
 ifeq ($(FILE_PATH),$(FILE))
@@ -54,7 +59,13 @@ $(INSTALLED): $(BUILT_FILE)
 	mkdir -p "$(dir $@)"
 	rsync --quiet --checksum --ignore-times "$<" "$@"
 
+
+ifndef INERT
 install: $(INSTALLED)
+else
+install:
+	@echo "Inert; not installing in $(INSTALLED)."
+endif
 
 
 uninstall::
@@ -64,4 +75,3 @@ uninstall::
 clean:
 	rm -rf $(TO_CLEAN) *~
 
--include Makefile-local

@@ -2,13 +2,18 @@
 # Makefile for a directory
 #
 
+-include Makefile-local
+
 ifndef DEST_DIR
   DEST_DIR := $(HOME)
 endif
 
-MODE := 755
+ifndef MODE
+  MODE := 755
+endif
 
-DIR_PATH := $(DEST_DIR)/$(subst dot-,.,$(shell pwd | sed -e 's|^.*/home/||'))
+# TODO: Pass the path in instead of hard-wiring it.
+DIR_PATH := $(DEST_DIR)/$(subst dot-,.,$(shell pwd | sed -e 's|^.*/work/||'))
 
 
 default: build
@@ -17,11 +22,18 @@ default: build
 build:
 	@echo Nothing to do here.
 
+
 $(DIR_PATH)::
 	mkdir -p "$@"
 	chmod $(MODE) "$@"
 
+
+ifndef INERT
 install: $(DIR_PATH)
+else
+install:
+	@echo "Inert; not installing in $(DIR_PATH)."
+endif
 
 
 uninstall::
@@ -30,5 +42,3 @@ uninstall::
 
 clean:
 	rm -rf $(TO_CLEAN) *~
-
--include Makefile-local

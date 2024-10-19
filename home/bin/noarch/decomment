@@ -1,0 +1,6 @@
+#!/bin/sh -e
+#
+# De-comment file(s) or stdin to stdout
+#
+
+sed -e 's/\s*#.*$//; /^\s*$/d' "$@"

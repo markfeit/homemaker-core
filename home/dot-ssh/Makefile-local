@@ -1,0 +1,5 @@
+# Local customizations
+
+MODE := 700
+
+INERT := 1

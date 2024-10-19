@@ -1,0 +1,29 @@
+#!/bin/sh -e
+#
+# Figure out what OS and release is running
+#
+
+SYSTEM=$(uname -s)
+
+case "${SYSTEM}" in
+    Darwin)
+        RESULT="OSX$(sw_vers -productVersion | awk -F. '{ print $1 }')"
+        ;;
+
+    Linux)
+        if [ -r /etc/os-release ]
+        then
+            . /etc/os-release
+            NAME=$(echo "${PRETTY_NAME}" | sed -e 's/\s.*$//g')
+            RESULT="${NAME}${VERSION_ID}"
+        else
+            RESULT="${SYSTEM}"
+        fi
+        ;;
+
+    *)
+        RESULT="${SYSTEM}"
+        ;;
+esac
+
+echo "${RESULT}"

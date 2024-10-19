@@ -1,8 +1,39 @@
 #!/bin/sh -e
+#
+# Build one or more targets for all files and directories.
+#
+# Args:
+#  1 - Location of files and directories
+#  2 - Path to Makefile templates (Makefile-x), where x is 'dir' or
+#      'file', depending on what type is to be built.
+#
 
 TOP=$(cd "$1" && pwd)
 shift
 
+MAKEFILES=$(cd "$1" && pwd)
+shift
+
+# Add Makefiles based on homemaker-type where that exists.
+
+find "${TOP}" -name 'homemaker-type' \
+    | while read FILE
+do
+    TYPE=$(cat "${FILE}")
+    TEMPLATE="${MAKEFILES}/Makefile-${TYPE}"
+    if [ -e "${TEMPLATE}" ]
+    then
+	TARGET=$(dirname "${FILE}")/Makefile
+	rm -rf "${TARGET}"
+	cp -f "${TEMPLATE}" "${TARGET}"
+    else
+	RELATIVE=$(echo "${FILE}" | sed -e "s|^${TOP}/||g")
+	echo "Unknown type '${TYPE}' in ${RELATIVE}" 1>&2
+	exit 1
+    fi
+done
+
+# Build it.
 
 find "${TOP}" -name Makefile \
     | sed -e 's|//|/|g' \
@@ -12,8 +43,9 @@ find "${TOP}" -name Makefile \
     set -e
     while read DIR
     do
+	RELATIVE=$(echo "${DIR}" | sed -e "s|^${TOP}/||g")
 	printf "\n\n#\n"
-	echo "# ${DIR}: make $@"
+	echo "# ${RELATIVE}: make $@"
 	printf "#\n\n"
 	make -C "${DIR}" "$@"
     done

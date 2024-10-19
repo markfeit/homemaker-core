@@ -1,0 +1,5 @@
+# Local customizations
+
+MODE := 400
+
+INERT := 1
