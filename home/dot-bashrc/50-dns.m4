@@ -4,5 +4,5 @@
 
 debug __file__
 
-dnf Enable this to set LOCALDOMAIN
-dnf _hm_ifenabled(home,<<<export LOCALDOMAIN="home.example.com example.com">>>)
+dnl Enable this to set LOCALDOMAIN
+dnl _hm_ifenabled(home,<<<export LOCALDOMAIN="home.example.com example.com">>>)
